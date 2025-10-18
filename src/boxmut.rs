@@ -9,23 +9,25 @@ where
 }
 
 impl<T: Sized> BoxMut<T> {
-    pub fn new(value: T) -> Result<Self, String> {
+    pub fn new(value: T) -> Self {
         return unsafe {
             let layout: Layout = Layout::new::<T>();
 
             let ptr: *mut T = alloc(layout) as *mut T;
 
-            if ptr.is_null() {
-                Result::Err("Allocation failed!".into())
-            } else {
+            if !ptr.is_null() {
                 std::ptr::write(ptr, value);
+            }
 
-                Result::Ok(Self {
-                    handle: ptr,
-                    layout: layout,
-                })
+            Self {
+                handle: ptr,
+                layout: layout,
             }
         };
+    }
+
+    pub fn is_valid(&self) -> bool {
+        return !self.handle.is_null();
     }
 
     pub fn get_ref(&self) -> Option<&T> {
@@ -34,6 +36,25 @@ impl<T: Sized> BoxMut<T> {
 
     pub fn get_mut(&self) -> Option<&mut T> {
         return unsafe { self.handle.as_mut() };
+    }
+}
+
+impl<T: Sized + Clone> Clone for BoxMut<T> {
+    fn clone(&self) -> Self {
+        return unsafe {
+            let layout: Layout = Layout::new::<T>();
+
+            let ptr: *mut T = alloc(layout) as *mut T;
+
+            if !ptr.is_null() {
+                std::ptr::write(ptr, self.get_ref().unwrap().clone());
+            }
+
+            Self {
+                handle: ptr,
+                layout: layout,
+            }
+        };
     }
 }
 

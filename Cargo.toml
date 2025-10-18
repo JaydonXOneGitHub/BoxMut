@@ -1,6 +1,6 @@
 [package]
 name = "boxmut"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2024"
 description = "A mutable version of Rust's built-in Box<T>."
 readme = "README.md"
